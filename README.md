@@ -1,4 +1,4 @@
-# BOND
+# BOND- forked - Multilingual Support
 This repo contains our code and pre-processed distantly/weakly labeled data for paper [BOND: BERT-Assisted Open-Domain Name Entity Recognition with Distant Supervision (KDD2020)](https://arxiv.org/abs/2006.15509)
 
 ## BOND
@@ -31,12 +31,12 @@ Python 3.7, Pytorch 1.3, Hugging Face Transformers v2.3.0.
 We provides the training scripts for all five open-domain distantly/weakly labeled NER datasets in [scripts](scripts). E.g., for BOND training and evaluation on CoNLL03
 ```
 cd BOND
-./scripts/conll_self_training.sh
+./scripts/epidemic_self_training.sh
 ```
 For Stage I training and evaluation on CoNLL03
 ```
 cd BOND
-./scripts/conll_baseline.sh
+./scripts/epidemic_baseline.sh
 ```
 The test reuslts (entity-level F1 score) are summarized as follows:
 
