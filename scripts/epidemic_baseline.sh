@@ -31,7 +31,7 @@ MODEL_NAME=xlm-roberta-base
 # params
 LR=1e-5
 WEIGHT_DECAY=1e-4
-EPOCH=15
+EPOCH=20
 SEED=42
 
 ADAM_EPS=1e-8
