@@ -1,4 +1,4 @@
-# BOND- forked - Multilingual Support
+# BOND- forked - Multilingual Support.
 This repo contains our code and pre-processed distantly/weakly labeled data for paper [BOND: BERT-Assisted Open-Domain Name Entity Recognition with Distant Supervision (KDD2020)](https://arxiv.org/abs/2006.15509)
 
 ## BOND
