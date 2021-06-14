@@ -13,8 +13,8 @@ echo "Run on GPU $GPUID"
 PROJECT_ROOT=$(dirname "$(readlink -f "$0")")/..
 ## DATA_ROOT=$PROJECT_ROOT/dataset/conll03_distant/
 
-# DATA_ROOT=$PROJECT_ROOT/dataset/epidemic/$LANG
-DATA_ROOT=$PROJECT_ROOT/dataset/epidemic/relevant/xlm_128
+DATA_ROOT=$PROJECT_ROOT/dataset/epidemic/$LANG
+# DATA_ROOT=$PROJECT_ROOT/dataset/epidemic/relevant/xlm_128
 
 
 rm -rf $PROJECT_ROOT/outputs/*

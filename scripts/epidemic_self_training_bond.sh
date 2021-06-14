@@ -6,7 +6,7 @@ else
   GPUID=$1
 fi
 
-LANG=pl
+LANG=el
 echo "Run on GPU $GPUID"
 echo "language: $LANG"
 
