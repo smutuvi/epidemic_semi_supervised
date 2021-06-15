@@ -13,7 +13,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import numpy as np
+import torch
+import random
+manualSeed = 1
 
+np.random.seed(manualSeed)
+random.seed(manualSeed)
+torch.manual_seed(manualSeed)
+# if you are suing GPU
+torch.cuda.manual_seed(manualSeed)
+torch.cuda.manual_seed_all(manualSeed)
+
+
+torch.backends.cudnn.enabled = False 
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
 import argparse
 import glob
 import logging
@@ -231,7 +246,7 @@ def train(args, train_dataset, model, tokenizer, labels, pad_token_label_id):
 
                 _lambda = args.mt_lambda
                 if args.mt_class != 'smart':
-                    _lambda = args.mt_lambda * min(1,math.exp(-5*(1-update_step/args.mt_rampup)**2))
+                    _lambda = args.mt_lambda * min(1, math.exp(-5*(1-update_step/args.mt_rampup)**2))
                 
                 if args.mt_loss_type == "embeds":
                     mt_loss = get_mt_loss(final_embeds, teacher_final_embeds.detach(), args.mt_class, _lambda)
@@ -621,7 +636,7 @@ def main():
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train")
+        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="original_train")
         # import ipdb; ipdb.set_trace()
         if args.load_weak:
             weak_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="unlabeled", remove_labels=args.remove_labels_from_weak)
