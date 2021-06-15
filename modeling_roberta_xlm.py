@@ -6,9 +6,6 @@ import torch.nn as nn
 from modeling_roberta import RobertaForTokenClassification_v2
 
 
-from configuration_xlm_roberta import XLMRobertaConfig
-
-
 XLM_ROBERTA_PRETRAINED_MODEL_ARCHIVE_LIST = [
     "xlm-roberta-base",
     "xlm-roberta-large",
