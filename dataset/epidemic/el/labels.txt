@@ -1,5 +1,0 @@
-B-DIS
-B-LOC
-I-DIS
-I-LOC
-O
