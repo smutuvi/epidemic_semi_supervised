@@ -5,7 +5,7 @@ else
   GPUID=$1
 fi
 
-LANG=el
+LANG=en
 echo "Run on GPU $GPUID"
 echo "language: $LANG"
 
@@ -28,7 +28,7 @@ MODEL_NAME=xlm-roberta-base
 # params
 LR=1e-5
 WEIGHT_DECAY=1e-4
-EPOCH=20
+EPOCH=3
 SEED=42
 
 ADAM_EPS=1e-8
@@ -36,7 +36,7 @@ ADAM_BETA1=0.9
 ADAM_BETA2=0.98
 WARMUP=200
 
-TRAIN_BATCH=8
+TRAIN_BATCH=16
 EVAL_BATCH=16
 
 # output
@@ -67,7 +67,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=$GPUID python3 run_ner.py --da
   --output_dir $OUTPUT \
   --cache_dir $PROJECT_ROOT/pretrained_model \
   --seed $SEED \
-  --max_seq_length 128 \
+  --max_seq_length 256 \
   --overwrite_output_dir \
   --mt 1 \
   --load_weak \

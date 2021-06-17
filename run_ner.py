@@ -636,10 +636,10 @@ def main():
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="original_train")
+        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train_70")
         # import ipdb; ipdb.set_trace()
         if args.load_weak:
-            weak_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="unlabeled", remove_labels=args.remove_labels_from_weak)
+            weak_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="unlabeled_train_30", remove_labels=args.remove_labels_from_weak)
             train_dataset = torch.utils.data.ConcatDataset([train_dataset]*args.rep_train_against_weak + [weak_dataset,])
             
         global_step, tr_loss, best_dev, best_test = train(args, train_dataset, model, tokenizer, labels, pad_token_label_id)
