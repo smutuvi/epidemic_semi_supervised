@@ -1,20 +1,7 @@
-# coding=utf-8
-# Copyright 2018 The Google AI Language Team Authors and The HuggingFace Inc. team.
-# Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-""" Named entity recognition fine-tuning: utilities to work with CoNLL-2003 task. """
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 
 import logging
 import os
@@ -56,9 +43,21 @@ class InputFeatures(object):
         self.full_label_ids = full_label_ids
         self.hp_label_ids = hp_label_ids
 
-
+import unicodedata
+def strip_accents_and_lowercase(s):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
+   
 def read_examples_from_file(data_dir, mode):
     file_path = os.path.join(data_dir, "{}.txt".format(mode))
+    
+#    import pdb;pdb.set_trace()
+    accented_string = "Αυτή είναι η Ελληνική έκδοση του BERT."
+    unaccented_string = strip_accents_and_lowercase(accented_string)
+    
+#    import pdb;pdb.set_trace()
+    print(unaccented_string) # αυτη ειναι η ελληνικη εκδοση του bert.
+
     guid_index = 1
     examples = []
     with open(file_path, encoding="utf-8") as f:
@@ -72,6 +71,7 @@ def read_examples_from_file(data_dir, mode):
                         hp_labels = item["tags_hp"]
                     else:
                         hp_labels = [None]*len(labels)
+                    
                     examples.append(InputExample(guid="{}-{}".format(mode, guid_index),
                                                  words=words,
                                                  labels=labels, hp_labels=hp_labels))
@@ -95,6 +95,7 @@ def read_examples_from_file(data_dir, mode):
             examples.append(InputExample(guid="%s-%d".format(mode, guid_index),
                                          words=words,
                                          labels=labels, hp_labels=hp_labels))
+#    
     return examples
 
 
@@ -270,7 +271,7 @@ def convert_examples_to_features(
 
 # def load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode):
 def load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode, remove_labels=False):
-    if args.local_rank not in [-1, 0] and not evaluate:
+    if args.local_rank not in [-1, 0]:# and not evaluate:
         torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
 
     # Load data features from cache or dataset file
@@ -308,7 +309,7 @@ def load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode, r
             logger.info("Saving features into cached file %s", cached_features_file)
             torch.save(features, cached_features_file)
 
-    if args.local_rank == 0 and not evaluate:
+    if args.local_rank == 0:# and not evaluate:
         torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
 
     # Convert to Tensors and build dataset
@@ -322,20 +323,22 @@ def load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode, r
     if remove_labels:
         all_full_label_ids.fill_(pad_token_label_id)
         all_hp_label_ids.fill_(pad_token_label_id)
+        all_label_ids.fill_(pad_token_label_id) #TODO
+        
     all_ids = torch.tensor([f for f in range(len(features))], dtype=torch.long)
 
     dataset = TensorDataset(all_input_ids, all_input_mask, all_segment_ids, all_label_ids, all_full_label_ids, all_hp_label_ids, all_ids)
     return dataset
 
 def get_labels(path):
-    if path:
-        with open(os.path.join(path,'labels.txt'), "r") as f:
-            label = f.read().splitlines()
-        if "O" not in label:
-            label = ["O"] + label
-        return label
-    else:
-        return ["O", "B-DIS", "I-DIS",  "B-LOC", "I-LOC", "U"]
+#    if path:
+#        with open(os.path.join(path,'labels.txt'), "r") as f:
+#            label = f.read().splitlines()
+#        if "O" not in label:
+#            label = label + ["O"]
+#        return label
+#    else:
+        return ["O",  "B-DIS", "I-DIS", "B-LOC", "I-LOC"]
 
 def tag_to_id(path = None):
     if path and os.path.exists(path + "tag_to_id.json"):
@@ -343,7 +346,7 @@ def tag_to_id(path = None):
             data = json.load(f)
         return data
     else:
-        return {"O": 0, "B-LOC": 1, "B-DIS": 2, "I-LOC": 3, "I-DIS": 4, "U": 5}
+        return {"O": 0, "B-DIS": 1, "I-DIS": 2, "B-LOC": 3, "I-LOC": 4}#, "U": 5}
 
 def get_chunk_type(tok, idx_to_tag):
     """
