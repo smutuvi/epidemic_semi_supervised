@@ -79,10 +79,10 @@ def read_examples_from_file(data_dir, mode):
                     words = []
                     labels = []
             else:
-                splits = line.split("\t")
+                splits = line.split(" ")
                 words.append(splits[0])
                 if len(splits) > 1:
-                    labels.append(splits[1].replace("\n", ""))
+                    labels.append(splits[-1].replace("\n", ""))
                 else:
                     # Examples could have no label for mode = "test"
                     labels.append("O")
@@ -347,6 +347,7 @@ def tag_to_id(path = None):
             data = json.load(f)
         return data
     else:
+    
         return {"O": 0, "B-DIS": 1, "I-DIS": 2, "B-LOC": 3, "I-LOC": 4}#, "U": 5}
 
 def get_chunk_type(tok, idx_to_tag):
