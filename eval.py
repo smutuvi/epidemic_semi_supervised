@@ -297,6 +297,11 @@ def evaluate(args, model, tokenizer, labels, pad_token_label_id, best, mode, pre
     logger.info("***** Eval results %s *****", prefix)
     for key in sorted(results.keys()):
         logger.info("  %s = %s", key, str(results[key]))
-    print(nerevaluate(true_tags, pred_tags))
-
+    
+    try:
+        print(nerevaluate(true_tags, pred_tags))
+    except:
+        pass
+        
+        
     return results, preds_list, best, is_updated

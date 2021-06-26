@@ -1,18 +1,5 @@
-# coding=utf-8
-# Copyright 2018 The Google AI Language Team Authors and The HuggingFace Inc. team.
-# Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import argparse
 import glob
@@ -77,11 +64,10 @@ logger = logging.getLogger(__name__)
 
 MODEL_CLASSES = {
     "bert": (BertConfig, BERTForTokenClassification_v2, BertTokenizer),
-    # "bert": (BertConfig, BertForTokenClassification, BertTokenizer),
-    "roberta": (RobertaConfig, RobertaForTokenClassification_v2, RobertaTokenizer),
+    "xlmroberta": (XLMRobertaConfig, XLMRobertaForTokenClassification_v2, XLMRobertaTokenizer),
     "distilbert": (DistilBertConfig, DistilBertForTokenClassification, DistilBertTokenizer),
     "camembert": (CamembertConfig, CamembertForTokenClassification, CamembertTokenizer),
-    "xlmroberta": (XLMRobertaConfig, XLMRobertaForTokenClassification_v2, XLMRobertaTokenizer),
+    # "xlmroberta": (XLMRobertaConfig, XLMRobertaForTokenClassification, XLMRobertaTokenizer),
 }
 
 def set_seed(args):
@@ -180,10 +166,14 @@ def train(args, train_dataset, model_class, config, tokenizer, labels, pad_token
     global_step = 0
     epochs_trained = 0
     steps_trained_in_current_epoch = 0
+#    import pdb;pdb.set_trace()
     # Check if continuing training from a checkpoint
     if os.path.exists(args.model_name_or_path):
         # set global_step to gobal_step of last saved checkpoint from model path
         global_step = int(args.model_name_or_path.split("-")[-1].split("/")[0])
+        
+#        global_step = int(args.model_name_or_path.split("-")[-1].split("/")[0])
+        
         epochs_trained = global_step // (len(train_dataloader) // args.gradient_accumulation_steps)
         steps_trained_in_current_epoch = global_step % (len(train_dataloader) // args.gradient_accumulation_steps)
 
@@ -320,7 +310,6 @@ def train(args, train_dataset, model_class, config, tokenizer, labels, pad_token
                         adv_direct = vat_embeds.grad / (vat_embeds.grad.abs().max(-1, keepdim=True)[0]+1e-4)
                         vat_embeds = vat_embeds + args.vat_eps * adv_direct
                         vat_embeds = vat_embeds.detach()
-
                         vat_inputs = {"inputs_embeds": vat_embeds, "attention_mask": batch[1], "labels": batch[3]}
                         if args.model_type != "distilbert":
                             inputs["token_type_ids"] = (
