@@ -35,12 +35,12 @@ class InputExample(object):
 class InputFeatures(object):
     """A single set of features of data."""
 
-    def __init__(self, input_ids, input_mask, segment_ids, label_ids, full_label_ids, hp_label_ids):
+    def __init__(self, input_ids, input_mask, segment_ids, label_ids, hp_label_ids):
         self.input_ids = input_ids
         self.input_mask = input_mask
         self.segment_ids = segment_ids
         self.label_ids = label_ids
-        self.full_label_ids = full_label_ids
+#        self.full_label_ids = full_label_ids
         self.hp_label_ids = hp_label_ids
 
 import unicodedata
@@ -79,10 +79,10 @@ def read_examples_from_file(data_dir, mode):
                     words = []
                     labels = []
             else:
-                splits = line.split(" ")
+                splits = line.split("\t")
                 words.append(splits[0])
                 if len(splits) > 1:
-                    labels.append(splits[-1].replace("\n", ""))
+                    labels.append(splits[1].replace("\n", ""))
                 else:
                     # Examples could have no label for mode = "test"
                     labels.append("O")
@@ -247,7 +247,7 @@ def convert_examples_to_features(
         assert len(segment_ids) == max_seq_length
         assert len(label_ids) == max_seq_length
         assert len(hp_label_ids) == max_seq_length
-        assert len(full_label_ids) == max_seq_length
+#        assert len(full_label_ids) == max_seq_length
 
 
 
@@ -260,11 +260,11 @@ def convert_examples_to_features(
             logger.info("segment_ids: %s", " ".join([str(x) for x in segment_ids]))
             logger.info("label_ids: %s", " ".join([str(x) for x in label_ids]))
             logger.info("hp_label_ids: %s", " ".join([str(x) for x in hp_label_ids]))
-            logger.info("full_label_ids: %s", " ".join([str(x) for x in full_label_ids]))
+#            logger.info("full_label_ids: %s", " ".join([str(x) for x in full_label_ids]))
 
 
         features.append(
-            InputFeatures(input_ids=input_ids, input_mask=input_mask, segment_ids=segment_ids, label_ids=label_ids, full_label_ids=full_label_ids, hp_label_ids=hp_label_ids)
+            InputFeatures(input_ids=input_ids, input_mask=input_mask, segment_ids=segment_ids, label_ids=label_ids, hp_label_ids=hp_label_ids)
         )
     logger.info("Extra long example %d of %d", extra_long_samples, len(examples))
     return features
@@ -318,16 +318,16 @@ def load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode, r
     all_segment_ids = torch.tensor([f.segment_ids for f in features], dtype=torch.long)
     all_label_ids = torch.tensor([f.label_ids for f in features], dtype=torch.long)
     all_hp_label_ids = torch.tensor([f.hp_label_ids for f in features], dtype=torch.long)
-    all_full_label_ids = torch.tensor([f.full_label_ids for f in features], dtype=torch.long)
+#    all_full_label_ids = torch.tensor([f.full_label_ids for f in features], dtype=torch.long)
 
-    if remove_labels:
-        all_full_label_ids.fill_(pad_token_label_id)
-        all_hp_label_ids.fill_(pad_token_label_id)
-        all_label_ids.fill_(pad_token_label_id) #TODO
+#    if remove_labels:
+#        all_full_label_ids.fill_(pad_token_label_id)
+#        all_hp_label_ids.fill_(pad_token_label_id)
+#        all_label_ids.fill_(pad_token_label_id) #TODO
         
     all_ids = torch.tensor([f for f in range(len(features))], dtype=torch.long)
 
-    dataset = TensorDataset(all_input_ids, all_input_mask, all_segment_ids, all_label_ids, all_full_label_ids, all_hp_label_ids, all_ids)
+    dataset = TensorDataset(all_input_ids, all_input_mask, all_segment_ids, all_label_ids, all_hp_label_ids, all_ids)
     return dataset
 
 def get_labels(path):
@@ -339,6 +339,7 @@ def get_labels(path):
 #        return label
 #    else:
         return ["O",  "B-DIS", "I-DIS", "B-LOC", "I-LOC"]
+    
 
 def tag_to_id(path = None):
     if path and os.path.exists(path + "tag_to_id.json"):
