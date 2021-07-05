@@ -1,5 +1,5 @@
-# Example Greek - all of these need to be run 5 times with different seeds (--seed) for the mean and std to be reported
-# 20%/80%
+## Example Greek - all of these need to be run 5 times with different seeds (--seed) for the mean and std to be reported
+## 20%/80%
 
 Step 1:
 
@@ -7,7 +7,9 @@ Change in code:train_dataset = load_and_cache_examples(args, tokenizer, labels, 
 
 Change in code:mode_predict = "unlabeled_train_80"
 
+```
 CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=0 python run_ner.py --data_dir dataset/epidemic/el  --model_type xlmroberta --model_name_or_path xlm-roberta-base   --learning_rate 1e-5   --weight_decay 1e-4   --adam_epsilon 1e-8   --adam_beta1 0.9   --adam_beta2 0.98   --num_train_epochs 20   --warmup_steps 200   --per_gpu_train_batch_size 16   --per_gpu_eval_batch_size 16  --logging_steps 152  --save_steps 100000 --do_train --do_eval  --do_predict   --evaluate_during_training   --output_dir outputs/stage1_el_20   --cache_dir pretrained_model   --seed 1   --max_seq_length 128   --overwrite_output_dir
+```
 
 The code, at the end:
 - predicts and prints the results for test.txt
@@ -24,8 +26,9 @@ Change in code: weak_dataset = load_and_cache_examples(args, tokenizer, labels, 
 
 Change model_name_or_path: model_name_or_path = outputs/stage1_el_20/checkpoint-best/
 
+```
 CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=0 python run_ner.py --data_dir dataset/epidemic/el   --model_type bert --model_name_or_path outputs/stage1_el_20/checkpoint-best/   --learning_rate 1e-5   --weight_decay 1e-4   --adam_epsilon 1e-8   --adam_beta1 0.9   --adam_beta2 0.98   --num_train_epochs 20   --warmup_steps 200   --per_gpu_train_batch_size 16   --per_gpu_eval_batch_size 16   --logging_steps 87   --save_steps 1000 --do_train --do_eval   --do_predict   --evaluate_during_training   --output_dir outputs/stage2_el_20   --cache_dir pretrained_model   --seed 1   --max_seq_length 128   --overwrite_output_dir   --mt 1   --load_weak --rep_train_against_weak 1
-
+```
 
 
 
