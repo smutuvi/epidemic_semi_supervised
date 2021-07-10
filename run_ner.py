@@ -625,11 +625,11 @@ def main():
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train_20")
+        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train")
 #        train_dataset = torch.utils.data.ConcatDataset([train_dataset]*10)
         # import ipdb; ipdb.set_trace()
         if args.load_weak:
-            weak_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="test_predictions_unlabeled_train_80", remove_labels=args.remove_labels_from_weak)
+            weak_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="test_predictions_unlabeled", remove_labels=args.remove_labels_from_weak)
             train_dataset = torch.utils.data.ConcatDataset([train_dataset]*args.rep_train_against_weak + [weak_dataset,])
             
         global_step, tr_loss, best_dev, best_test = train(args, train_dataset, model, tokenizer, labels, pad_token_label_id)
@@ -706,7 +706,7 @@ def main():
                         #output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
 #                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
                         
-        mode_predict = "unlabeled_train_80"
+        mode_predict = "unlabeled"
         result, predictions, _, _ = evaluate(args, model, tokenizer, labels, pad_token_label_id, best=best_test, mode=mode_predict)
 #        # Save results
 #        output_test_results_file = os.path.join(args.output_dir, "test_results.txt")
@@ -729,8 +729,9 @@ def main():
                     elif predictions[example_id]:
                         output_line = line.split()[0] + " " + line.split()[1] + " " + predictions[example_id].pop(0) + "\n"
                         writer.write(output_line)
-                    #else:
-                        #output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
+                    else:
+                        output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
+                        writer.write(output_line)
 #                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
 
     return results

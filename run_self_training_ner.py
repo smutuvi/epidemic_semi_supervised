@@ -729,7 +729,10 @@ def main():
                         output_line = line.split()[0] + " " + line.split()[1] + " " + predictions[example_id].pop(0) + "\n"
                         writer.write(output_line)
                     else:
-                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
+                        output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
+                        writer.write(output_line)
+
+#                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
 
     return results
 
