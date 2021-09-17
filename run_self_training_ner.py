@@ -563,10 +563,10 @@ def main():
     parser.add_argument('--self_training_hp_label', type = float, default = 0, help = 'use high precision label.')
     parser.add_argument('--self_training_ensemble_label', type = int, default = 0, help = 'use ensemble label.')
 
-    # Use data from weak.json
-    parser.add_argument('--load_weak', action="store_true", help = 'Load data from weak.json.')
-    parser.add_argument('--remove_labels_from_weak', action="store_true", help = 'Use data from weak.json, and remove their labels for semi-supervised learning')
-    parser.add_argument('--rep_train_against_weak', type = int, default = 1, help = 'Upsampling training data again weak data. Default: 1')
+    # Use data from unlabeled.json
+    parser.add_argument('--load_unlabeled', action="store_true", help = 'Load data from unlabeled.json.')
+    parser.add_argument('--remove_labels_from_unlabeled', action="store_true", help = 'Use data from unlabeled.json, and remove their labels for semi-supervised learning')
+    parser.add_argument('--rep_train_against_unlabeled', type = int, default = 1, help = 'Upsampling training data again unlabeled data. Default: 1')
 
     args = parser.parse_args()
 
@@ -654,16 +654,16 @@ def main():
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train_70")
+        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train_50")
         # import ipdb; ipdb.set_trace()
-        if args.load_weak:
-            weak_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="unlabeled_train_30", remove_labels=args.remove_labels_from_weak)
-            train_dataset = torch.utils.data.ConcatDataset([train_dataset]*args.rep_train_against_weak + [weak_dataset,])
+        if args.load_unlabeled:
+            unlabeled_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="test_predictions_unlabeled_train_50", remove_labels=args.remove_labels_from_unlabeled)
+            train_dataset = torch.utils.data.ConcatDataset([train_dataset]*args.rep_train_against_unlabeled + [unlabeled_dataset,])
             
         model, global_step, tr_loss, best_dev, best_test = train(args, train_dataset, model_class, config, tokenizer, labels, pad_token_label_id)
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
 
-    # Saving last-practice: if you use defaults names for the model, you can reload it using from_pretrained()
+    # Saving last-practice: if you use defaults names for the model, you can reload it using from_pretrained() 
     if args.do_train and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
         logger.info("Saving model checkpoint to %s", args.output_dir)
         model_to_save = (
@@ -673,7 +673,6 @@ def main():
         tokenizer.save_pretrained(args.output_dir)
         torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
         torch.save(model.state_dict(), os.path.join(args.output_dir, "model.pt"))
-
     # Evaluation
     results = {}
     if args.do_eval and args.local_rank in [-1, 0]:
@@ -702,10 +701,10 @@ def main():
                 writer.write("{} = {}\n".format(key, str(results[key])))
 
     if args.do_predict and args.local_rank in [-1, 0]:
-        tokenizer = tokenizer_class.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
-        model = model_class.from_pretrained(args.output_dir)
+        tokenizer = tokenizer_class.from_pretrained(os.path.join(args.output_dir, 'checkpoint-best'), do_lower_case=args.do_lower_case)
+        model = model_class.from_pretrained(os.path.join(args.output_dir, 'checkpoint-best'))
         model.to(args.device)
-
+        best_dev, best_test = [0, 0, 0], [0, 0, 0]
         if not best_test:
             best_test = [0, 0, 0]
         result, predictions, _, _ = evaluate(args, model, tokenizer, labels, pad_token_label_id, best=best_test, mode="test")
@@ -717,9 +716,38 @@ def main():
 
         # Save predictions
         output_test_predictions_file = os.path.join(args.output_dir, "test_predictions.txt")
-        with open(output_test_predictions_file, "w") as writer:
-            with open(os.path.join(args.data_dir, "test.txt"), "r") as f:
+        with open(output_test_predictions_file, "w", encoding="utf-8") as writer:
+            with open(os.path.join(args.data_dir, "test.txt"), "r", encoding="utf-8") as f:
                 example_id = 0
+#                import pdb;pdb.set_trace()
+#                lines = f.readlines()
+                for line in f:
+                    if line.startswith("-DOCSTART-") or line == "" or line == "\n":
+                        writer.write(line)
+                        if not predictions[example_id]:
+                            example_id += 1
+                    elif predictions[example_id]:
+                        output_line = line.split()[0] + " " + line.split()[1] + " " + predictions[example_id].pop(0) + "\n"
+                        writer.write(output_line)
+                    #else:
+                        #output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
+#                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
+                        
+        mode_predict = "unlabeled_train_50"
+        result, predictions, _, _ = evaluate(args, model, tokenizer, labels, pad_token_label_id, best=best_test, mode=mode_predict)
+#        # Save results
+#        output_test_results_file = os.path.join(args.output_dir, "test_results.txt")
+#        with open(output_test_results_file, "w") as writer:
+#            for key in sorted(result.keys()):
+#                writer.write("{} = {}\n".format(key, str(result[key])))
+
+        # Save predictions
+        output_test_predictions_file = os.path.join(args.output_dir, "test_predictions_" + mode_predict + ".txt")
+        with open(output_test_predictions_file, "w", encoding="utf-8") as writer:
+            with open(os.path.join(args.data_dir, mode_predict + ".txt"), "r", encoding="utf-8") as f:
+                example_id = 0
+#                import pdb;pdb.set_trace()
+#                lines = f.readlines()
                 for line in f:
                     if line.startswith("-DOCSTART-") or line == "" or line == "\n":
                         writer.write(line)
@@ -731,8 +759,8 @@ def main():
                     else:
                         output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
                         writer.write(output_line)
-
 #                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
+
 
     return results
 

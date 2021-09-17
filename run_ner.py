@@ -525,10 +525,10 @@ def main():
     parser.add_argument('--vat_loss_type', default="logits", type=str, help="subject to measure model difference, choices = [embeds, logits(default)].")
 
 
-    # Use data from weak data
-    parser.add_argument('--load_weak', action="store_true", help = 'Load data from weak.json.')
-    parser.add_argument('--remove_labels_from_weak', action="store_true", help = 'Use data from weak.json, and remove their labels for semi-supervised learning')
-    parser.add_argument('--rep_train_against_weak', type = int, default = 1, help = 'Upsampling training data again weak data. Default: 1')
+    # Use data from unlabeled data
+    parser.add_argument('--load_unlabeled', action="store_true", help = 'Load data from unlabeled.json.')
+    parser.add_argument('--remove_labels_from_unlabeled', action="store_true", help = 'Use data from unlabeled.json, and remove their labels for semi-supervised learning')
+    parser.add_argument('--rep_train_against_unlabeled', type = int, default = 1, help = 'Upsampling training data again unlabeled data. Default: 1')
 
 
     args = parser.parse_args()
@@ -625,12 +625,12 @@ def main():
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train")
+        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train_50")
 #        train_dataset = torch.utils.data.ConcatDataset([train_dataset]*10)
         # import ipdb; ipdb.set_trace()
-        if args.load_weak:
-            weak_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="test_predictions_unlabeled", remove_labels=args.remove_labels_from_weak)
-            train_dataset = torch.utils.data.ConcatDataset([train_dataset]*args.rep_train_against_weak + [weak_dataset,])
+        if args.load_unlabeled:
+            unlabeled_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="test_predictions_unlabeled_train_50", remove_labels=args.remove_labels_from_unlabeled)
+            train_dataset = torch.utils.data.ConcatDataset([train_dataset]*args.rep_train_against_unlabeled + [unlabeled_dataset,])
             
         global_step, tr_loss, best_dev, best_test = train(args, train_dataset, model, tokenizer, labels, pad_token_label_id)
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
@@ -677,6 +677,11 @@ def main():
         tokenizer = tokenizer_class.from_pretrained(os.path.join(args.output_dir, 'checkpoint-best'), do_lower_case=args.do_lower_case)
         model = model_class.from_pretrained(os.path.join(args.output_dir, 'checkpoint-best'))
         model.to(args.device)
+
+        # tokenizer = tokenizer_class.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
+        # model = model_class.from_pretrained(args.output_dir)
+        # model.to(args.device)
+
         best_dev, best_test = [0, 0, 0], [0, 0, 0]
         if not best_test:
             best_test = [0, 0, 0]
@@ -706,7 +711,7 @@ def main():
                         #output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
 #                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
                         
-        mode_predict = "unlabeled"
+        mode_predict = "unlabeled_train_50"
         result, predictions, _, _ = evaluate(args, model, tokenizer, labels, pad_token_label_id, best=best_test, mode=mode_predict)
 #        # Save results
 #        output_test_results_file = os.path.join(args.output_dir, "test_results.txt")
