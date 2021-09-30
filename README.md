@@ -1,3 +1,5 @@
+Original: https://github.com/cliang1453/BOND
+
 ## Example Greek - all of these need to be run 5 times with different seeds (--seed) for the mean and std to be reported
 ## 20%/80%
 
@@ -35,7 +37,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=0 python run_ner.py --data_dir
 
 
 
-# BOND- forked - Multilingual Support.
+## BOND- forked - Multilingual Support. https://github.com/cliang1453/BOND
 This repo contains our code and pre-processed distantly/weakly labeled data for paper [BOND: BERT-Assisted Open-Domain Name Entity Recognition with Distant Supervision (KDD2020)](https://arxiv.org/abs/2006.15509)
 
 ## BOND
