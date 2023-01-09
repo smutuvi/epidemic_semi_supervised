@@ -625,7 +625,7 @@ def main():
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train_50")
+        train_dataset = load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode="train")
 #        train_dataset = torch.utils.data.ConcatDataset([train_dataset]*10)
         # import ipdb; ipdb.set_trace()
         if args.load_unlabeled:
@@ -711,7 +711,7 @@ def main():
                         #output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
 #                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
                         
-        mode_predict = "unlabeled_train_50"
+        mode_predict = "test"
         result, predictions, _, _ = evaluate(args, model, tokenizer, labels, pad_token_label_id, best=best_test, mode=mode_predict)
 #        # Save results
 #        output_test_results_file = os.path.join(args.output_dir, "test_results.txt")
