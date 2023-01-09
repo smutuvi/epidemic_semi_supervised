@@ -338,7 +338,7 @@ def get_labels(path):
 #            label = label + ["O"]
 #        return label
 #    else:
-        return ["O",  "B-DIS", "I-DIS", "B-LOC", "I-LOC"]
+        return ['O','B-GPE','B-CROP','B-ORG','I-ORG','B-DATE','I-DATE','B-PLANT_PART','I-CROP','B-LOC','I-LOC','B-PATHOGEN','I-PATHOGEN','I-GPE','B-DISEASE','I-DISEASE','I-PLANT_PART']
     
 
 def tag_to_id(path = None):
@@ -347,8 +347,9 @@ def tag_to_id(path = None):
             data = json.load(f)
         return data
     else:
+        return {'O': 0, 'B-GPE': 1, 'B-CROP': 2, 'B-ORG': 3, 'I-ORG':4, 'B-DATE':5, 'I-DATE': 6, 'B-PLANT_PART': 7, 'I-CROP':8, 'B-LOC':9, 'I-LOC':10, 'B-PATHOGEN':11, 'I-PATHOGEN':12,'I-GPE':13, 'B-DISEASE':14, 'I-DISEASE':15, 'I-PLANT_PART':16}
     
-        return {"O": 0, "B-DIS": 1, "I-DIS": 2, "B-LOC": 3, "I-LOC": 4}#, "U": 5}
+        # return {"O": 0, "B-DIS": 1, "I-DIS": 2, "B-LOC": 3, "I-LOC": 4}#, "U": 5}
 
 def get_chunk_type(tok, idx_to_tag):
     """
