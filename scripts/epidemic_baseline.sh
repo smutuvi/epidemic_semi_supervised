@@ -27,7 +27,7 @@ MODEL_NAME=bert-base-cased
 # params
 LR=1e-5
 WEIGHT_DECAY=1e-4
-EPOCH=1
+EPOCH=3
 SEED=42
 
 ADAM_EPS=1e-8
