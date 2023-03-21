@@ -719,13 +719,31 @@ def main():
 #            for key in sorted(result.keys()):
 #                writer.write("{} = {}\n".format(key, str(result[key])))
 
+#         # Save predictions
+#         output_test_predictions_file = os.path.join(args.output_dir, "test_predictions_" + mode_predict + ".txt")
+#         with open(output_test_predictions_file, "w", encoding="utf-8") as writer:
+#             with open(os.path.join(args.data_dir, mode_predict + ".txt"), "r", encoding="utf-8") as f:
+#                 example_id = 0
+# #                import pdb;pdb.set_trace()
+# #                lines = f.readlines()
+#                 for line in f:
+#                     if line.startswith("-DOCSTART-") or line == "" or line == "\n":
+#                         writer.write(line)
+#                         if not predictions[example_id]:
+#                             example_id += 1
+#                     elif predictions[example_id]:
+#                         output_line = line.split()[0] + " " + line.split()[1] + " " + predictions[example_id].pop(0) + "\n"
+#                         writer.write(output_line)
+#                     else:
+#                         output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
+#                         writer.write(output_line)
+# #                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
         # Save predictions
-        output_test_predictions_file = os.path.join(args.output_dir, "test_predictions_" + mode_predict + ".txt")
-        with open(output_test_predictions_file, "w", encoding="utf-8") as writer:
-            with open(os.path.join(args.data_dir, mode_predict + ".txt"), "r", encoding="utf-8") as f:
+        output_test_predictions_file = os.path.join(
+            args.output_dir, args.model_name_or_path + "_test_predictions.txt")
+        with open(output_test_predictions_file, "w") as writer:
+            with open(os.path.join(args.data_dir, "test.txt"), "r") as f:
                 example_id = 0
-#                import pdb;pdb.set_trace()
-#                lines = f.readlines()
                 for line in f:
                     if line.startswith("-DOCSTART-") or line == "" or line == "\n":
                         writer.write(line)
@@ -735,9 +753,8 @@ def main():
                         output_line = line.split()[0] + " " + line.split()[1] + " " + predictions[example_id].pop(0) + "\n"
                         writer.write(output_line)
                     else:
-                        output_line = line.split()[0] + " " + line.split()[1] + " " + "O\n"
-                        writer.write(output_line)
-#                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
+                        logger.warning(
+                            "Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
 
     return results
 
