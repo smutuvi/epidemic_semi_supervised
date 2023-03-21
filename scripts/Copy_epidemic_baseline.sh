@@ -5,24 +5,28 @@ else
   GPUID=$1
 fi
 
+LANG=el
+echo "Run on GPU $GPUID"
+echo "language: $LANG"
+
 # data
 PROJECT_ROOT=$(dirname "$(readlink -f "$0")")/..
 ## DATA_ROOT=$PROJECT_ROOT/dataset/conll03_distant/
 
-DATA_ROOT=$PROJECT_ROOT/dataset/
+DATA_ROOT=$PROJECT_ROOT/dataset/epidemic/$LANG
 # DATA_ROOT=$PROJECT_ROOT/dataset/epidemic/relevant/xlm_128
 
 
 rm -rf $PROJECT_ROOT/outputs/*
-rm -rf $PROJECT_ROOT/dataset/cached_*
+rm -rf $PROJECT_ROOT/dataset/epidemic/$LANG/cached_*
 rm -rf $PROJECT_ROOT/runs/*
 
 
-# MODEL_TYPE=xlmroberta
-# MODEL_NAME=xlm-roberta-base
+MODEL_TYPE=xlmroberta
+MODEL_NAME=xlm-roberta-base
 
-MODEL_TYPE=bert
-MODEL_NAME=bert-base-cased
+# MODEL_TYPE=bert
+# MODEL_NAME=bert-base-multilingual-cased
 
 # params
 LR=1e-5
