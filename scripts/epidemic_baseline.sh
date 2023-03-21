@@ -27,7 +27,7 @@ MODEL_NAME=bert-base-cased
 # params
 LR=1e-5
 WEIGHT_DECAY=1e-4
-EPOCH=3
+EPOCH=1
 SEED=42
 
 ADAM_EPS=1e-8
@@ -65,6 +65,6 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=$GPUID python3 run_ner.py --da
   --output_dir $OUTPUT \
   --cache_dir $PROJECT_ROOT/pretrained_model \
   --seed $SEED \
-  --max_seq_length 256 \
+  --max_seq_length 128 \
   --overwrite_output_dir \
   # --do_lower_case \
